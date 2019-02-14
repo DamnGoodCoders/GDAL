@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 export NDK_ROOT=$1
 export MIN_SDK_VERSION=$2
 export APP_ROOT=$(pwd)
@@ -6,6 +6,8 @@ export APP_ROOT=$(pwd)
 export GDALDIR=$APP_ROOT/../submodules/gdal/gdal
 export PROJDIR=$APP_ROOT/../submodules/proj4
 export BUILDDIR=$APP_ROOT/../submodules/build
+
+echo "APP_ROOT" $APP_ROOT
 
 ######## ARM #########
 $NDK_ROOT/build/tools/make-standalone-toolchain.sh --platform=android-$MIN_SDK_VERSION --install-dir=$BUILDDIR/toolchain-$MIN_SDK_VERSION-arm --stl=libc++ --force
@@ -20,6 +22,7 @@ make
 make install
 mkdir -p $APP_ROOT/src/main/jniLibs/armeabi-v7a
 cp $BUILDDIR/arm/lib/libgdal.so $APP_ROOT/src/main/jniLibs/armeabi-v7a/
+mkdir $APP_ROOT/src/main/cpp
 cp -a $BUILDDIR/arm/include $APP_ROOT/src/main/cpp/include
 
 # SWIG, ARM
@@ -32,6 +35,7 @@ make ANDROID=yes
 # Make install may produce lint java error (ColorTable). The cmd below overrules it.
 $GDALDIR/libtool --mode=install $GDALDIR/install-sh -c lib*jni.la $BUILDDIR/arm/lib
 cp $BUILDDIR/arm/lib/lib*jni.so $APP_ROOT/src/main/jniLibs/armeabi-v7a/
+mkdir $APP_ROOT/libs
 cp gdal.jar $APP_ROOT/libs/
 #cp -r org $APP_ROOT/src/main/java/
 cp *_wrap.cpp $APP_ROOT/src/main/cpp/
